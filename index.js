@@ -103,6 +103,25 @@ async function run() {
     });
 
 
+
+    const scholarshipCollection = client.db('arScholarPoint').collection('scholarships');
+
+    // --- send scholarships
+    app.get('/scholarships', async (req, res) => {
+      const cursor = scholarshipCollection.find();
+      const result = await cursor.toArray();
+      res.send(result);
+    });
+
+     // --- received scholarships from client
+     app.post('/scholarships', async (req, res) => {
+      const item = req.body;
+      console.log(item);
+      const result = await scholarshipCollection.insertOne(item);
+      res.send(result);
+    });
+
+
     // Send a ping to confirm a successful connection
     // await client.db("admin").command({ ping: 1 });
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
