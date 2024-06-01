@@ -37,14 +37,40 @@ const cookieOptions = {
 };
 
 
+const verifyToken = async (req, res, next) => {
+  const token = req?.cookies?.token;
+  console.log("token 1", token);
+  if (!token) {
+    return res.status(401).send({ message: 'not authorized' })
+  }
+  jwt.verify(token, process.env.JWT_ACCESS_TOKEN_SECRET, (err, decoded) => {
+    // ------ error
+    if (err) {
+      return res.status(401).send({ message: 'this is not authorized' })
+    }
+    // ----- if token is valid then it would be decoded
+    console.log('value in the token', decoded)
+    req.user = decoded;
+    next();
+  })
+};
+
+
 async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
 
     const userCollection = client.db('arScholarPoint').collection('users');
 
-    app.get('/users', async (req, res) => {
-      const result = await userCollection.find().toArray();
+    app.get('/users', verifyToken, async (req, res) => {
+      if (req.user.email !== req.query.email) {
+        return res.status(403).send({ message: 'forbidden access' })
+      }
+      let filter = {};
+      if (req.query?.email) {
+        filter = { email: req.query.email }
+      }
+      const result = await userCollection.find(filter).toArray();
       res.send(result);
     });
 
