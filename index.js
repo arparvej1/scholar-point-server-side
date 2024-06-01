@@ -39,7 +39,7 @@ const cookieOptions = {
 
 const verifyToken = async (req, res, next) => {
   const token = req?.cookies?.token;
-  console.log("token 1", token);
+  // console.log("token 1", token);
   if (!token) {
     return res.status(401).send({ message: 'not authorized' })
   }
@@ -60,18 +60,38 @@ async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
 
+    //--------- creating Token
+    app.post('/jwt', async (req, res) => {
+      const user = req.body;
+      const token = jwt.sign(user, process.env.JWT_ACCESS_TOKEN_SECRET, { expiresIn: '5h' });
+
+      res.cookie('token', token, cookieOptions).send({ success: true })
+    });
+
+    app.post('/logout', async (req, res) => {
+      const user = req.body;
+      console.log('logging out', user);
+      res.clearCookie('token', { maxAge: 0 }).send({ success: true })
+    });
+
     const userCollection = client.db('arScholarPoint').collection('users');
 
-    app.get('/users', verifyToken, async (req, res) => {
-      if (req.user.email !== req.query.email) {
+    app.get('/users/:email', verifyToken, async (req, res) => {
+      // console.log(req.params?.email);
+      const userEmail = req.params?.email;
+      if (req.user.email !== userEmail) {
         return res.status(403).send({ message: 'forbidden access' })
       }
       let filter = {};
-      if (req.query?.email) {
-        filter = { email: req.query.email }
+      if (req.params?.email) {
+        filter = { email: userEmail }
       }
       const result = await userCollection.find(filter).toArray();
-      res.send(result);
+      if (result) {
+        res.send({ verifyUser: true });
+      } else {
+        res.send({ verifyUser: false });
+      }
     });
 
     // --- received user from client
