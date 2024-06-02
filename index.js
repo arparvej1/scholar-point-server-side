@@ -121,15 +121,46 @@ async function run() {
       res.send(result);
     });
 
-     // --- received scholarships from client
-     app.post('/scholarships', async (req, res) => {
+    // --- received scholarships from client
+    app.post('/scholarships', async (req, res) => {
       const item = req.body;
       console.log(item);
       const result = await scholarshipCollection.insertOne(item);
       res.send(result);
     });
 
-    
+    // Update scholarship - put
+    app.put('/scholarship/:scholarshipId', async (req, res) => {
+      const id = req.params.scholarshipId;
+      const filter = { _id: new ObjectId(id) }
+      const options = { upsert: true };
+      const updatedScholarship = req.body;
+
+      const scholarship = {
+        $set: {
+          scholarshipName: updatedScholarship.new_scholarshipName,
+          universityName: updatedScholarship.new_universityName,
+          universityLogo: updatedScholarship.new_universityLogo,
+          universityCountry: updatedScholarship.new_universityCountry,
+          universityCity: updatedScholarship.new_universityCity,
+          universityRank: updatedScholarship.new_universityRank,
+          subjectCategory: updatedScholarship.new_subjectCategory,
+          scholarshipCategory: updatedScholarship.new_scholarshipCategory,
+          degree: updatedScholarship.new_degree,
+          tuitionFees: updatedScholarship.new_tuitionFees,
+          applicationFees: updatedScholarship.new_applicationFees,
+          serviceCharge: updatedScholarship.new_serviceCharge,
+          applicationDeadline: updatedScholarship.new_applicationDeadline,
+          scholarshipPostDate: updatedScholarship.new_scholarshipPostDate,
+          postedUserEmail: updatedScholarship.new_postedUserEmail,
+          postedUserDisplayName: updatedScholarship.new_postedUserDisplayName,
+        }
+      }
+      const result = await scholarshipCollection.updateOne(filter, scholarship, options);
+      res.send(result);
+    });
+
+
     app.get('/scholarshipsLimit', async (req, res) => {
       const page = parseInt(req.query.page);
       const size = parseInt(req.query.size);
