@@ -129,6 +129,14 @@ async function run() {
       res.send(result);
     });
 
+    // --- delete scholarship from client
+    app.delete('/scholarship/:scholarshipId', async (req, res) => {
+      const id = req.params.scholarshipId;
+      const query = { _id: new ObjectId(id) }
+      const result = await scholarshipCollection.deleteOne(query);
+      res.send(result);
+    });
+
     // Update scholarship - put
     app.put('/scholarship/:scholarshipId', async (req, res) => {
       const id = req.params.scholarshipId;
