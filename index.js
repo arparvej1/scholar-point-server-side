@@ -113,6 +113,14 @@ async function run() {
       res.send(result);
     });
 
+    // ---- send single scholarship
+    app.get('/scholarship/:scholarshipId', async (req, res) => {
+      const id = req.params.scholarshipId;
+      const query = { _id: new ObjectId(id) }
+      const result = await scholarshipCollection.findOne(query);
+      res.send(result);
+    });
+
      // --- received scholarships from client
      app.post('/scholarships', async (req, res) => {
       const item = req.body;
@@ -121,27 +129,43 @@ async function run() {
       res.send(result);
     });
 
-
-
-
-
     
-    const categoryCollection = client.db('arScholarPoint').collection('category');
+    app.get('/scholarshipsLimit', async (req, res) => {
+      const page = parseInt(req.query.page);
+      const size = parseInt(req.query.size);
+      const filterQty = parseInt(req.query?.filterQty);
+      console.log('filterQty', filterQty);
+      let filter = 0;
+      if (filterQty >= 1) {
+        filter = filterQty === 1 ? { quantity: { $gte: 1 } } : { quantity: { $gte: 0 } };
+      } else {
+        filter = { quantity: { $lte: 0 } };
+      }
 
-    // --- send user
-    app.get('/category', async (req, res) => {
-      const cursor = categoryCollection.find();
-      const result = await cursor.toArray();
+      console.log('pagination query', page, size);
+      const result = await scholarshipCollection.find()
+        .skip(page * size)
+        .limit(size)
+        .toArray();
       res.send(result);
     });
 
-    // --- received user from client
-    app.post('/category', async (req, res) => {
-      const category = req.body;
-      console.log(category);
-      const result = await categoryCollection.insertOne(category);
-      res.send(result);
+    app.get('/scholarshipsCount', async (req, res) => {
+      const filterQty = parseInt(req.query?.filterQty);
+      console.log(filterQty);
+      let filter = 0;
+      if (filterQty >= 1) {
+        filter = filterQty === 1 ? { quantity: { $gte: 1 } } : { quantity: { $gte: 0 } };
+      } else {
+        filter = { quantity: { $lte: 1 } };
+      }
+      // const count = scholarshipCollection.estimatedDocumentCount();
+      const result = await scholarshipCollection.find().toArray();
+      const count = result.length;
+      res.send({ count });
     });
+
+
 
     // Send a ping to confirm a successful connection
     // await client.db("admin").command({ ping: 1 });
