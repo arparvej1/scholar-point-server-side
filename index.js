@@ -207,7 +207,7 @@ async function run() {
 
 
 
-    
+
     const reviewCollection = client.db('arScholarPoint').collection('reviews');
 
     // --- send reviews
@@ -217,11 +217,13 @@ async function run() {
       res.send(result);
     });
 
-    // ---- send single review
-    app.get('/review/:reviewId', async (req, res) => {
-      const id = req.params.reviewId;
-      const query = { _id: new ObjectId(id) }
-      const result = await reviewCollection.findOne(query);
+    // ---- send filter reviews
+    app.get('/reviewsFilter', async (req, res) => {
+      // const id = req.params.scholarshipId;
+      const id = req.query.scholarshipId;
+
+      const query = { scholarshipId: id }
+      const result = await reviewCollection.find(query).toArray();
       res.send(result);
     });
 
