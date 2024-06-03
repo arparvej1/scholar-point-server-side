@@ -160,6 +160,7 @@ async function run() {
           serviceCharge: updatedScholarship.new_serviceCharge,
           applicationDeadline: updatedScholarship.new_applicationDeadline,
           scholarshipPostDate: updatedScholarship.new_scholarshipPostDate,
+          scholarshipDescription: updatedScholarship.new_scholarshipDescription,
           postedUserEmail: updatedScholarship.new_postedUserEmail,
           postedUserDisplayName: updatedScholarship.new_postedUserDisplayName,
         }
@@ -205,6 +206,32 @@ async function run() {
     });
 
 
+
+    
+    const reviewCollection = client.db('arScholarPoint').collection('reviews');
+
+    // --- send reviews
+    app.get('/reviews', async (req, res) => {
+      const cursor = reviewCollection.find();
+      const result = await cursor.toArray();
+      res.send(result);
+    });
+
+    // ---- send single review
+    app.get('/review/:reviewId', async (req, res) => {
+      const id = req.params.reviewId;
+      const query = { _id: new ObjectId(id) }
+      const result = await reviewCollection.findOne(query);
+      res.send(result);
+    });
+
+    // --- received reviews from client
+    app.post('/reviews', async (req, res) => {
+      const item = req.body;
+      console.log(item);
+      const result = await reviewCollection.insertOne(item);
+      res.send(result);
+    });
 
     // Send a ping to confirm a successful connection
     // await client.db("admin").command({ ping: 1 });
