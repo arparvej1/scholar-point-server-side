@@ -38,20 +38,17 @@ const cookieOptions = {
 };
 
 
-const verifyToken = async (req, res, next) => {
-  const token = req?.cookies?.token;
-  // console.log("token 1", token);
-  if (!token) {
-    return res.status(401).send({ message: 'not authorized' })
+const verifyToken = (req, res, next) => {
+  // console.log('inside verify token', req.headers.authorization);
+  if (!req.headers.authorization) {
+    return res.status(401).send({ message: 'unauthorized access' });
   }
+  const token = req.headers.authorization.split(' ')[1];
   jwt.verify(token, process.env.JWT_ACCESS_TOKEN_SECRET, (err, decoded) => {
-    // ------ error
     if (err) {
-      return res.status(401).send({ message: 'this is not authorized' })
+      return res.status(401).send({ message: 'unauthorized access' })
     }
-    // ----- if token is valid then it would be decoded
-    console.log('value in the token', decoded)
-    req.user = decoded;
+    req.decoded = decoded;
     next();
   })
 };
@@ -64,9 +61,8 @@ async function run() {
     //--------- creating Token
     app.post('/jwt', async (req, res) => {
       const user = req.body;
-      const token = jwt.sign(user, process.env.JWT_ACCESS_TOKEN_SECRET, { expiresIn: '5h' });
-
-      res.cookie('token', token, cookieOptions).send({ success: true })
+      const token = jwt.sign(user, process.env.JWT_ACCESS_TOKEN_SECRET, { expiresIn: '1h' });
+      res.send({ token });
     });
 
     app.post('/logout', async (req, res) => {
@@ -213,7 +209,7 @@ async function run() {
     app.post('/create-payment-intent', async (req, res) => {
       const { price } = req.body;
       const amount = parseInt(price * 100);
-      console.log(amount, 'amount inside the intent')
+      // console.log(amount, 'amount inside the intent')
 
       const paymentIntent = await stripe.paymentIntents.create({
         amount: amount,
@@ -229,6 +225,8 @@ async function run() {
 
     app.get('/payments/:email', verifyToken, async (req, res) => {
       const query = { email: req.params.email }
+      console.log(query);
+      console.log(req.decoded.email);
       if (req.params.email !== req.decoded.email) {
         return res.status(403).send({ message: 'forbidden access' });
       }
@@ -242,7 +240,15 @@ async function run() {
       res.send({ paymentResult });
     });
 
+    const scholarshipApplyCollection = client.db('arScholarPoint').collection('scholarshipApply');
 
+    // --- received scholarshipApply from client
+    app.post('/scholarshipApply', async (req, res) => {
+      const item = req.body;
+      console.log(item);
+      const result = await scholarshipApplyCollection.insertOne(item);
+      res.send(result);
+    });
 
     const reviewCollection = client.db('arScholarPoint').collection('reviews');
 
