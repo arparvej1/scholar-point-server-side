@@ -74,7 +74,7 @@ async function run() {
     const userCollection = client.db('arScholarPoint').collection('users');
 
     app.get('/users/:email', verifyToken, async (req, res) => {
-      // console.log(req.params?.email);
+      console.log(req.params?.email);
       const userEmail = req.params?.email;
       if (req.user.email !== userEmail) {
         return res.status(403).send({ message: 'forbidden access' })
@@ -84,7 +84,7 @@ async function run() {
         filter = { email: userEmail }
       }
       const result = await userCollection.find(filter).toArray();
-      if (result) {
+      if (result && result.length > 0) {
         res.send({ verifyUser: true });
       } else {
         res.send({ verifyUser: false });
