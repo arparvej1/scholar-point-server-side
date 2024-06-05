@@ -242,6 +242,17 @@ async function run() {
 
     const scholarshipApplyCollection = client.db('arScholarPoint').collection('scholarshipApply');
 
+    app.get('/scholarshipApply/:email', verifyToken, async (req, res) => {
+      const query = { email: req.params.email }
+      console.log(query);
+      console.log(req.decoded.email);
+      if (req.params.email !== req.decoded.email) {
+        return res.status(403).send({ message: 'forbidden access' });
+      }
+      const result = await scholarshipApplyCollection.find(query).toArray();
+      res.send(result);
+    });
+
     // --- received scholarshipApply from client
     app.post('/scholarshipApply', async (req, res) => {
       const item = req.body;
