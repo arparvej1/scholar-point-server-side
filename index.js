@@ -253,6 +253,15 @@ async function run() {
       res.send(result);
     });
 
+    
+    // ---- send single apply
+    app.get('/apply/:applyId', async (req, res) => {
+      const id = req.params.applyId;
+      const query = { _id: new ObjectId(id) }
+      const result = await scholarshipApplyCollection.findOne(query);
+      res.send(result);
+    });
+
     // --- received scholarshipApply from client
     app.post('/scholarshipApply', async (req, res) => {
       const item = req.body;
