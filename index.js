@@ -102,6 +102,25 @@ async function run() {
     // ---------------- database entry --------------------
     const adminCollection = client.db('arScholarPoint').collection('adminInfo');
 
+    app.get('/allAdminAndAgent/:email', verifyToken, async (req, res) => {
+      if (req.params.email !== req.decoded.email) {
+        return res.status(403).send({ message: 'forbidden access' })
+      }
+      let filter = {};
+      if (req.params?.email) {
+        filter = { email: req.params.email, role: 'admin' }
+      }
+      const result = await adminCollection.find(filter).toArray();
+      // res.send(result);
+      if (result.length > 0) {
+        const allAdmin = await adminCollection.find({ role: 'admin' }).toArray();
+        const allAgent = await adminCollection.find({ role: 'agent' }).toArray();
+        res.send({ allAdmin, allAgent })
+      } else {
+        res.send({ admin: false })
+      }
+    });
+
     app.get('/checkAdmin/:email', verifyToken, async (req, res) => {
       // console.log('decoded 1', req.decoded.email);
       if (req.params.email !== req.decoded.email) {
