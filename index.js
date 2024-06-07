@@ -278,6 +278,42 @@ async function run() {
       res.send(result);
     });
 
+
+    // Update scholarshipApply - put
+    app.put('/scholarshipApply/:applyId', async (req, res) => {
+      const id = req.params.applyId;
+      const filter = { _id: new ObjectId(id) }
+      const options = { upsert: true };
+      const updatedScholarshipApply = req.body;
+
+      const scholarshipApply = {
+        $set: {
+          applicantPhoneNumber: updatedScholarshipApply.new_applicantPhoneNumber,
+          applicantAddressVillage: updatedScholarshipApply.new_applicantAddressVillage,
+          applicantAddressDistrict: updatedScholarshipApply.new_applicantAddressDistrict,
+          applicantAddressCountry: updatedScholarshipApply.new_applicantAddressCountry,
+          applicantGender: updatedScholarshipApply.new_applicantGender,
+          applicantApplyingDegree: updatedScholarshipApply.new_applicantApplyingDegree,
+          sscResult: updatedScholarshipApply.new_sscResult,
+          hscResult: updatedScholarshipApply.new_hscResult,
+          studyGap: updatedScholarshipApply.new_studyGap,
+          universityName: updatedScholarshipApply.new_universityName,
+          scholarshipCategory: updatedScholarshipApply.new_scholarshipCategory,
+          subjectCategory: updatedScholarshipApply.new_subjectCategory,
+          email: updatedScholarshipApply.new_email,
+          userDisplayName: updatedScholarshipApply.new_userDisplayName,
+          scholarshipId: updatedScholarshipApply.new_scholarshipId,
+          applyDate: updatedScholarshipApply.new_applyDate,
+          applicantPhoto: updatedScholarshipApply.new_applicantPhoto,
+          applicationFees: updatedScholarshipApply.new_applicationFees,
+          serviceCharge: updatedScholarshipApply.new_serviceCharge,
+          applicationStatus: updatedScholarshipApply.new_applicationStatus
+        }
+      }
+      const result = await scholarshipApplyCollection.updateOne(filter, scholarshipApply, options);
+      res.send(result);
+    });
+
     const reviewCollection = client.db('arScholarPoint').collection('reviews');
 
     // --- send reviews
