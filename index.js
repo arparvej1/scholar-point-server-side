@@ -352,6 +352,39 @@ async function run() {
       res.send(result);
     });
 
+    // --- delete reviews from client
+    app.delete('/review/:reviewId', async (req, res) => {
+      const id = req.params.reviewId;
+      const query = { _id: new ObjectId(id) }
+      const result = await reviewCollection.deleteOne(query);
+      res.send(result);
+    });
+
+
+    // Update review - put
+    app.put('/review/:reviewId', async (req, res) => {
+      const id = req.params.reviewId;
+      const filter = { _id: new ObjectId(id) }
+      const options = { upsert: true };
+      const updatedReview = req.body;
+
+      const review = {
+        $set: {
+          reviewerImage: updatedReview.new_reviewerImage,
+          reviewerName: updatedReview.new_reviewerName,
+          reviewerEmail: updatedReview.new_reviewerEmail,
+          reviewDate: updatedReview.new_reviewDate,
+          rating: updatedReview.new_rating,
+          comment: updatedReview.new_comment,
+          scholarshipId: updatedReview.new_scholarshipId,
+          universityName: updatedReview.new_universityName,
+          scholarshipName: updatedReview.new_scholarshipName
+        }
+      }
+      const result = await reviewCollection.updateOne(filter, review, options);
+      res.send(result);
+    });
+
     // Send a ping to confirm a successful connection
     // await client.db("admin").command({ ping: 1 });
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
