@@ -253,7 +253,7 @@ async function run() {
       res.send(result);
     });
 
-    
+
     // ---- send single apply
     app.get('/apply/:applyId', async (req, res) => {
       const id = req.params.applyId;
@@ -267,6 +267,14 @@ async function run() {
       const item = req.body;
       console.log(item);
       const result = await scholarshipApplyCollection.insertOne(item);
+      res.send(result);
+    });
+
+    // --- delete scholarshipApply from client
+    app.delete('/apply/:applyId', async (req, res) => {
+      const id = req.params.applyId;
+      const query = { _id: new ObjectId(id) }
+      const result = await scholarshipApplyCollection.deleteOne(query);
       res.send(result);
     });
 
