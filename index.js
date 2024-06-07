@@ -327,8 +327,19 @@ async function run() {
     app.get('/reviewsFilter', async (req, res) => {
       // const id = req.params.scholarshipId;
       const id = req.query.scholarshipId;
-
+      console.log(id);
       const query = { scholarshipId: id }
+      const result = await reviewCollection.find(query).toArray();
+      res.send(result);
+    });
+
+    app.get('/myReviews/:email', verifyToken, async (req, res) => {
+      const query = { reviewerEmail: req.params.email }
+      console.log(query);
+      console.log(req.decoded.email);
+      if (req.params.email !== req.decoded.email) {
+        return res.status(403).send({ message: 'forbidden access' });
+      }
       const result = await reviewCollection.find(query).toArray();
       res.send(result);
     });
