@@ -382,12 +382,49 @@ async function run() {
           applicantPhoto: updatedScholarshipApply.new_applicantPhoto,
           applicationFees: updatedScholarshipApply.new_applicationFees,
           serviceCharge: updatedScholarshipApply.new_serviceCharge,
+          scholarshipName: updatedScholarshipApply.new_scholarshipName,
           applicationStatus: updatedScholarshipApply.new_applicationStatus
         }
       }
       const result = await scholarshipApplyCollection.updateOne(filter, scholarshipApply, options);
       res.send(result);
     });
+
+
+    // scholarshipApply feedback - put
+    app.put('/scholarshipApplyFeedback/:applyId', async (req, res) => {
+      const id = req.params.applyId;
+      const filter = { _id: new ObjectId(id) }
+      const options = { upsert: true };
+      const updatedScholarshipApply = req.body;
+
+      const scholarshipApply = {
+        $set: {
+          applicantFeedback: updatedScholarshipApply.applicantFeedback,
+        }
+      }
+      const result = await scholarshipApplyCollection.updateOne(filter, scholarshipApply, options);
+      res.send(result);
+    });
+
+    // ---- update applicationStatus ---
+    app.patch('/scholarshipApply/:applyId', async (req, res) => {
+      const id = req.params.applyId;
+      const filter = { _id: new ObjectId(id) };
+      // const options = { upsert: true };
+      const updatedScholarshipApply = req.body;
+
+      const scholarshipApply = {
+        $set: {
+          applicationStatus: updatedScholarshipApply.new_applicationStatus
+        }
+      };
+
+      const result = await scholarshipApplyCollection.updateOne(filter, scholarshipApply);
+      res.send(result);
+    });
+
+
 
     const reviewCollection = client.db('arScholarPoint').collection('reviews');
 
