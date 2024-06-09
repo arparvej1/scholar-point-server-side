@@ -223,6 +223,25 @@ async function run() {
       }
     });
 
+    // --- delete user from client
+    app.delete('/userDelete/:email', verifyToken, async (req, res) => {
+      const email = req.params.email;
+      const query = { email: email }
+
+      let filter = {};
+      if (req.decoded?.email) {
+        filter = { email: req.decoded.email, role: 'admin' }
+      }
+      const isAdmin = await adminCollection.find(filter).toArray();
+      // res.send(result);
+      if (isAdmin.length > 0) {
+        const result = await adminCollection.deleteOne(query);
+        res.send(result);
+      } else {
+        res.send({ admin: false })
+      }
+    });
+
 
     const scholarshipCollection = client.db('arScholarPoint').collection('scholarships');
 
