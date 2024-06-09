@@ -106,7 +106,7 @@ async function run() {
     // --- received user from client
     app.post('/allUsers', async (req, res) => {
       const user = req.body;
-      const newUser = { ...user, rode: 'user' }
+      const newUser = { ...user, role: 'user' }
       console.log(newUser);
       const result = await adminCollection.insertOne(newUser);
       res.send(result);
