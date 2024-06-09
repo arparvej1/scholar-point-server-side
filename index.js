@@ -102,6 +102,16 @@ async function run() {
     // ---------------- database entry --------------------
     const adminCollection = client.db('arScholarPoint').collection('adminInfo');
 
+
+    // --- received user from client
+    app.post('/allUsers', async (req, res) => {
+      const user = req.body;
+      const newUser = { ...user, rode: 'user' }
+      console.log(newUser);
+      const result = await adminCollection.insertOne(newUser);
+      res.send(result);
+    });
+
     app.get('/allAdminAndAgent/:email', verifyToken, async (req, res) => {
       if (req.params.email !== req.decoded.email) {
         return res.status(403).send({ message: 'forbidden access' })
@@ -118,6 +128,43 @@ async function run() {
         res.send({ allAdmin, allAgent })
       } else {
         res.send({ admin: false })
+      }
+    });
+
+
+    app.get('/allUsers/:email', verifyToken, async (req, res) => {
+      if (req.params.email !== req.decoded.email) {
+        return res.status(403).send({ message: 'forbidden access' });
+      }
+
+      let filter = {};
+      if (req.params?.email) {
+        filter = { email: req.params.email, role: 'admin' };
+      }
+
+      const admin = await adminCollection.findOne(filter);
+
+      if (!admin) {
+        return res.send({ admin: false });
+      }
+
+      const projection = { password: 0 };
+      const allUsers = await adminCollection.find({}, projection).toArray();
+      res.send(allUsers);
+    });
+
+    app.get('/checkEmail/:email', async (req, res) => {
+      const email = req.params.email;
+      try {
+        const result = await adminCollection.findOne({ email });
+        if (result) {
+          res.send({ exists: true }); // Email exists
+        } else {
+          res.send({ exists: false }); // Email does not exist
+        }
+      } catch (error) {
+        console.error('Error checking if email exists:', error);
+        res.status(500).send({ message: 'Internal server error' });
       }
     });
 
@@ -305,7 +352,7 @@ async function run() {
       }
       let filter = {};
       if (req.params?.email) {
-        filter = { email: req.params.email }
+        filter = { email: req.params.email, role: { $in: ['admin', 'agent'] } }
       }
       const resultAgent = await adminCollection.find(filter).toArray();
       // res.send(resultAgent);
