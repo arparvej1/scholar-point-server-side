@@ -610,6 +610,27 @@ async function run() {
       res.send(result);
     });
 
+    
+    const subscriberCollection = client.db('arScholarPoint').collection('subscriber');
+
+    // --- received newSubscriber from client
+    app.post('/subscriber', async (req, res) => {
+      const subscriber = req.body;
+      console.log(subscriber);
+      const result = await subscriberCollection.insertOne(subscriber);
+      res.send(result);
+    });
+
+    // --- newSubscriber check
+    app.get('/checkSubscriber', async (req, res) => {
+      const newSubscriber = req.query.email;
+      let filter = { subscribeEmail: newSubscriber };
+      const result = await subscriberCollection.find(filter).toArray();
+      const subscribed = result.length ? true : false;
+      res.send({ subscribed });
+    });
+
+
     // Send a ping to confirm a successful connection
     // await client.db("admin").command({ ping: 1 });
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
