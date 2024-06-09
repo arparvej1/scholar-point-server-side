@@ -223,6 +223,34 @@ async function run() {
       }
     });
 
+
+    // ---- update user role ---
+    app.patch('/updateUser/:userId', verifyToken, async (req, res) => {
+      const id = req.params.userId;
+      const filterUser = { _id: new ObjectId(id) };
+      const userRoleUpdate = req.body;
+
+      const userRole = {
+        $set: {
+          role: userRoleUpdate.role
+        }
+      };
+
+      let filter = {};
+      if (req.decoded?.email) {
+        filter = { email: req.decoded.email, role: 'admin' }
+      }
+      const isAdmin = await adminCollection.find(filter).toArray();
+      if (isAdmin.length > 0) {
+        const result = await adminCollection.updateOne(filterUser, userRole);
+        res.send(result);
+      } else {
+        res.send({ admin: false })
+      }
+
+
+    });
+
     // --- delete user from client
     app.delete('/userDelete/:email', verifyToken, async (req, res) => {
       const email = req.params.email;
@@ -233,7 +261,6 @@ async function run() {
         filter = { email: req.decoded.email, role: 'admin' }
       }
       const isAdmin = await adminCollection.find(filter).toArray();
-      // res.send(result);
       if (isAdmin.length > 0) {
         const result = await adminCollection.deleteOne(query);
         res.send(result);
