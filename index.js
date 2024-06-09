@@ -339,17 +339,18 @@ async function run() {
     app.get('/scholarshipsLimit', async (req, res) => {
       const page = parseInt(req.query.page);
       const size = parseInt(req.query.size);
-      const filterQty = parseInt(req.query?.filterQty);
-      console.log('filterQty', filterQty);
-      let filter = 0;
-      if (filterQty >= 1) {
-        filter = filterQty === 1 ? { quantity: { $gte: 1 } } : { quantity: { $gte: 0 } };
-      } else {
-        filter = { quantity: { $lte: 0 } };
-      }
-
       console.log('pagination query', page, size);
-      const result = await scholarshipCollection.find()
+
+      const item = req.query.filterText;
+      const searchText = {
+        $or: [
+          { universityName: { $regex: item, $options: 'i' } },
+          { scholarshipName: { $regex: item, $options: 'i' } },
+          { degree: { $regex: item, $options: 'i' } }
+        ]
+      };
+
+      const result = await scholarshipCollection.find(searchText)
         .skip(page * size)
         .limit(size)
         .toArray();
@@ -359,14 +360,17 @@ async function run() {
     app.get('/scholarshipsCount', async (req, res) => {
       const filterQty = parseInt(req.query?.filterQty);
       console.log(filterQty);
-      let filter = 0;
-      if (filterQty >= 1) {
-        filter = filterQty === 1 ? { quantity: { $gte: 1 } } : { quantity: { $gte: 0 } };
-      } else {
-        filter = { quantity: { $lte: 1 } };
-      }
+
+      const item = req.query.filterText;
+      const searchText = {
+        $or: [
+          { universityName: { $regex: item, $options: 'i' } },
+          { scholarshipName: { $regex: item, $options: 'i' } },
+          { degree: { $regex: item, $options: 'i' } }
+        ]
+      };
       // const count = scholarshipCollection.estimatedDocumentCount();
-      const result = await scholarshipCollection.find().toArray();
+      const result = await scholarshipCollection.find(searchText).toArray();
       const count = result.length;
       res.send({ count });
     });
@@ -610,7 +614,7 @@ async function run() {
       res.send(result);
     });
 
-    
+
     const subscriberCollection = client.db('arScholarPoint').collection('subscriber');
 
     // --- received newSubscriber from client
