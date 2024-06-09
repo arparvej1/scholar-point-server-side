@@ -203,6 +203,26 @@ async function run() {
       }
     });
 
+    // Update admin info - put
+    app.put('/updateUser/:email', async (req, res) => {
+      const email = req.params.email;
+      const filter = { email: email }; // Using email directly as a filter
+      const updateUserData = req.body;
+
+      const updateUser = {
+        $set: {
+          name: updateUserData.name,
+          photoURL: updateUserData.photoURL
+        }
+      }
+      try {
+        const result = await adminCollection.updateOne(filter, updateUser);
+        res.send(result);
+      } catch (error) {
+        res.status(500).send(error);
+      }
+    });
+
 
     const scholarshipCollection = client.db('arScholarPoint').collection('scholarships');
 
