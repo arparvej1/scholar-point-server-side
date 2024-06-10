@@ -342,13 +342,16 @@ async function run() {
       console.log('pagination query', page, size);
 
       const item = req.query.filterText;
-      const searchText = {
-        $or: [
-          { universityName: { $regex: item, $options: 'i' } },
-          { scholarshipName: { $regex: item, $options: 'i' } },
-          { degree: { $regex: item, $options: 'i' } }
-        ]
-      };
+      let searchText = {}; 
+      if (item) {
+        searchText = {
+          $or: [
+            { universityName: { $regex: item, $options: 'i' } },
+            { scholarshipName: { $regex: item, $options: 'i' } },
+            { degree: { $regex: item, $options: 'i' } }
+          ]
+        };
+      }
 
       const result = await scholarshipCollection.find(searchText)
         .skip(page * size)
@@ -358,17 +361,18 @@ async function run() {
     });
 
     app.get('/scholarshipsCount', async (req, res) => {
-      const filterQty = parseInt(req.query?.filterQty);
-      console.log(filterQty);
-
       const item = req.query.filterText;
-      const searchText = {
-        $or: [
-          { universityName: { $regex: item, $options: 'i' } },
-          { scholarshipName: { $regex: item, $options: 'i' } },
-          { degree: { $regex: item, $options: 'i' } }
-        ]
-      };
+      let searchText = {}; 
+
+      if (item) {
+        searchText = {
+          $or: [
+            { universityName: { $regex: item, $options: 'i' } },
+            { scholarshipName: { $regex: item, $options: 'i' } },
+            { degree: { $regex: item, $options: 'i' } }
+          ]
+        };
+      }
       // const count = scholarshipCollection.estimatedDocumentCount();
       const result = await scholarshipCollection.find(searchText).toArray();
       const count = result.length;
