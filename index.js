@@ -11,6 +11,7 @@ const port = process.env.PORT || 5000;
 app.use(cors({
   origin: [
     'http://localhost:5173',
+    'http://localhost:5174',
     'https://arscholarpoint.web.app',
     'https://arscholarpoint.firebaseapp.com'
   ],
@@ -284,6 +285,19 @@ async function run() {
       const id = req.params.scholarshipId;
       const query = { _id: new ObjectId(id) }
       const result = await scholarshipCollection.findOne(query);
+      res.send(result);
+    });
+    
+    // --- search from client
+    app.get('/listSearch', async (req, res) => {
+      const item = req.query.input;
+      console.log(item);
+      const searchText = {
+        scholarshipName: { $regex: item, $options: 'i' }
+      }
+      const result = await scholarshipCollection.find(searchText)
+      .limit(10)
+      .toArray()
       res.send(result);
     });
 
